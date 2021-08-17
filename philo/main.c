@@ -1,62 +1,66 @@
 #include "philo.h"
 
-philo 			ph[10];
-
-params	*init_param(params *p, char **argv)
+void	death_checker(params *p, philo *ph)
 {
-	p->n_of_philo = ft_atoi(argv[1]);
-	p->time_to_die = ft_atoi(argv[2]);
-	p->time_to_eat = ft_atoi(argv[3]);
-	p->time_to_sleep = ft_atoi(argv[4]);
-	p->n_of_eat = 0;
-	if (argv[5])
-		p->n_of_eat = ft_atoi(argv[5]);
-	p->ph = malloc(sizeof(philo) * p->n_of_philo);
-	pthread_mutex_init(&(p->mutex), NULL);
-	return (p);
+    int i;
+
+    i = 0;
+	while (i < p->count)
+    {
+        if ((gettime() - ph[i].last_eat) > p->time_to_eat)
+            p->died = 1;
+        // printf("d %d\n", p->died);
+        i++;
+    }
 }
 
-void	*routine(void *phi)
+void	*routine(void *ph)
 {
-	pthread_mutex_lock(&(((philo *)phi)->mutex));
-	// if (phi->index == 1)
-	// {
-	// 	phi->lf = 1;
-	// 	phi->rf = 1;
-	// }
-	// else if (phi->index == phi->rule->n_of_philo)
-	// {
+    philo *p;
 
-	// }
-	printf("thread i %d\n", ((philo *)phi)->index);
-	pthread_mutex_unlock(&(((philo *)phi)->mutex));
+    p = (philo *)ph;
+    // pthread_mutex_lock(&(p->mutex));
+    if (p->index % 2)
+        usleep(15000);
+    // while (!(p->rule->died))
+    while (1)
+    {
+        live(p);
+        death_checker(p->rule, p);
+    }
+    // pthread_mutex_unlock(&(p->mutex));
+}
+
+void    create_threads(params *p)
+{
+    pthread_t   tid;
+    philo       *ph;
+    int         i;
+
+    i = 0;
+    ph = p->ph;
+    ph->rule->start = gettime();
+    while (i < p->count)
+    {
+        if (pthread_create(&tid, NULL, routine, &(ph[i])))
+            error_exit(3);
+        ph[i].last_eat = gettime();
+        i++;
+    }
+	death_checker(p, ph);
+    exiting(p, ph);
 }
 
 int	main(int argc, char **argv)
 {
 	params 	*param;
-	int		i;
 
-	if (argc != 5 && argc != 6)
-		return (1);
-	param = malloc(sizeof(param));
-	param = init_param(param, argv);
-	i = 0;
-	while (i < param->n_of_philo)
-	{
-		param->ph[i].index = i + 1;
-		param->ph[i].mutex = param->mutex;
-		param->ph[i].rule = param;
-		if (pthread_create(&(param->ph[i].tid), NULL, &routine, &(param->ph[i])) != 0)
-			return (2);
-		i++;
-	}
-	i = 0;
-	while (i < param->n_of_philo)
-	{
-		if (pthread_join(param->ph[i].tid, NULL) != 0)
-			return (2);
-		i++;
-	}
+	check_args(argc, argv);
+	param = malloc(sizeof(params));
+	if (!param)
+		error_exit(1);
+	init_param(param, argv);
+    // printf("d %d\n", param->ph[0].rule->died);
+	create_threads(param);
 	return (0);
 }
