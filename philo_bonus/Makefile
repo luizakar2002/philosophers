@@ -1,4 +1,4 @@
-NAME	= philo
+NAME	= philo_bonus
 
 SRCS	= $(wildcard *.c)
 

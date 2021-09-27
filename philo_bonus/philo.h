@@ -2,23 +2,26 @@
 # define PHILO_H
 
 # include <pthread.h>
+# include <semaphore.h>
+# include <signal.h>
+# include <fcntl.h>
 # include <stdio.h>
 # include <stdlib.h>
 # include <unistd.h>
 # include <sys/time.h>
+# include <sys/errno.h>
 
 struct params;
 
 typedef struct				philo
 {
 	int						index;
-	int						lf;
-	int						rf;
 	long long				last_eat;
 	int						eat_count;
 	struct params			*rule;
-	pthread_mutex_t			mutex;
-	pthread_mutex_t			eat_mutex;
+	sem_t					*sem;
+	sem_t					*eat_sem;
+	sem_t					*must_eat;
 }							philo;
 
 typedef struct		params
@@ -30,9 +33,10 @@ typedef struct		params
 	int 			n_of_eat;
 	long long		start;
 	struct philo	*ph;
-	pthread_mutex_t write_mutex;
-	pthread_mutex_t dead_mutex;
-	pthread_mutex_t *fork_mutex;
+	sem_t 			*write_sem;
+	sem_t 			*dead_sem;
+	sem_t 			*fork_sem;
+	
 }					params;
 
 //***main.c***//

@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: lukarape <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/09/01 19:41:32 by lukarape          #+#    #+#             */
-/*   Updated: 2021/09/01 19:41:34 by lukarape         ###   ########.fr       */
+/*   Created: 2021/09/01 19:42:13 by lukarape          #+#    #+#             */
+/*   Updated: 2021/09/01 19:42:15 by lukarape         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,12 +48,12 @@ void	error_exit(int code)
 	}
 	else if (code == 2)
 	{
-		write(1, "Error: not able to init a mutex\n", 32);
+		write(1, "Error: not able to init a sem\n", 32);
 		exit(1);
 	}
 	else if (code == 3)
 	{
-		write(1, "Error: not able to create a thread\n", 35);
+		write(1, "Error: not able to create a process\n", 35);
 		exit(1);
 	}
 	else if (code == 4)
@@ -103,9 +103,9 @@ long long	gettime(void)
 
 void	print(params *p, philo *ph, char *str, int flag)
 {
-	pthread_mutex_lock(&(p->write_mutex));
+	sem_wait(p->write_sem);
 	printf("%lli\t%d\t%s\n", gettime() - p->start, ph->index + 1, str);
 	if (flag != 1)
-		pthread_mutex_unlock(&(p->write_mutex));
+		sem_post(p->write_sem);
 	return ;
 }
