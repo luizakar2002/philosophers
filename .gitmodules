@@ -1,3 +1,0 @@
-[submodule "philo/philo/libft"]
-	path = philo/philo/libft
-	url = https://github.com/luizakar2002/libft.git
